@@ -23,12 +23,9 @@ void insertion_sort(int left, int right){
 
 void merge(int l, int m, int r){
     int len1 = m - l + 1, len2 = r - m;
-    int left[len1], right[len2];
-    for (int i = 0; i < len1; i++)
-        left[i] = arrey[l + i];
-    for (int i = 0; i < len2; i++)
-        right[i] = arrey[m + 1 + i];
-
+    std::vector<int> left, right;
+    left.assign(arrey.begin() + l, arrey.begin() + l + len1);
+    right.assign(arrey.begin() + m + 1, arrey.begin() + m + len2 + 1);
     int i = 0;
     int j = 0;
     int k = l;
@@ -71,7 +68,6 @@ void sort(int n, int thread_count){
     for (int size = RUN; size < n; size = 2 * size) {
         std::vector<std::thread> threads;
         for (int left = 0; left < n; left += 2 * size) {
-
             int mid = left + size - 1;
             int right = std::min((left + 2 * size - 1), (n - 1));
 
@@ -114,8 +110,5 @@ int main(int argc, char* argv[]) {
     auto start = std::chrono::steady_clock::now();
     sort(n, thread_count);
     auto end = std::chrono::steady_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "\n";
-    for(int i = 0; i < n; i++){
-       std::cout << arrey[i] << " ";
-    }
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()<< "ms" << "\n";
 }
