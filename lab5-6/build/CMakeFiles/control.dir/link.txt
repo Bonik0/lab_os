@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/control.dir/control.cpp.o -o control  -lpthread -lzmq 
