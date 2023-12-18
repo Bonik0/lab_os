@@ -6,5 +6,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(control control.cpp)
 add_executable(client client.cpp)
 
-target_link_libraries(control pthread zmq)
-target_link_libraries(client pthread zmq)
+target_link_libraries(con zmq)
+target_link_libraries(cl zmq)

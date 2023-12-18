@@ -1,5 +1,5 @@
 #include <iostream>
-#include <vector>
+#include <set>
 
 
 class Node{
@@ -20,7 +20,6 @@ class Node{
 class AVL_tree {
     private:
         Node *root;
-        std::vector<std::vector<int>> Nodes_need_swap;
         void destroy_node(Node * node){
             if(node != nullptr){
                 destroy_node(node->left);
@@ -55,7 +54,7 @@ class AVL_tree {
            if(node->left != nullptr && node->right != nullptr){
 	            return node->right->height - node->left->height;
             } else if (node->left != nullptr){
-                return node->left->height;
+                return -node->left->height;
             } else if (node->right != nullptr){
                 return node->right->height;
             } else{
@@ -84,16 +83,13 @@ class AVL_tree {
         Node* balance(Node* node){
             fix_height(node);
             if(bfactor(node) == 2){
-                std::cout << "1 " << node->id << "\n";
                 if(bfactor(node->right) < 0){
-                    std::cout << "2\n";
+
                     node->right = rotateright(node->right);
                 }
-
                 return rotateleft(node);
             }
             if(bfactor(node) == -2){
-                std::cout << 2;
                 if(bfactor(node->left) > 0){
                     node->left = rotateleft(node->left);
                 }
@@ -112,7 +108,25 @@ class AVL_tree {
             }
             return balance(p);
         }
+
+        Node * remove(Node *node, int id){
+            if (node == nullptr){
+                return node;
+            }
+            if (id == node->id){
+                free(node);
+                return nullptr;
+            }
+            if (id < node->id){
+                node->left = remove(node->left, id);
+            } else {
+                node->right = remove(node->right, id);
+            }
+            return balance(node);
+    }
+
     public:
+        std::vector<int> all_elem;
         AVL_tree(){
             root = nullptr;
         }
@@ -120,6 +134,7 @@ class AVL_tree {
             destroy_node(root);
         }
         void insert(int id){
+            all_elem.push_back(id);
             root = insert_(root, id);
         }
         void print(){
@@ -133,14 +148,14 @@ class AVL_tree {
             while (node != nullptr && node->id != id) {
                 if (node->id > id){
                     node = node->left;
-                }
-                else{
+                } else{
                     node = node->right;
                 }
             }
             return node;
         }
-
-
+        void remove_t(int id){
+            root = remove(root, id);
+        }
 
 };

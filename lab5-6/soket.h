@@ -2,6 +2,8 @@
 #include <iostream>
 #include "zmq.h"
 #include <cstring>
+#include <vector>
+
 
 const int MAIN_id = 4000;
 const char * CLIENT_NODE = "cl";
@@ -11,8 +13,11 @@ enum actions{
   fail = 0,
   success = 1,
   create = 2,
-  destroy = 4,
-  ping = 5
+  pingall = 3,
+  ping = 4,
+  exec = 5,
+  destroy = 6,
+  remove_t = 7
 };
 
 struct zmqmessage{
@@ -22,19 +27,22 @@ struct zmqmessage{
 };
 
 
-class Soket{
+
+
+
+class Socket{
     public:
-        void * soket;
+        void * socket;
         int id;
 
-        Soket(void * context){
+        Socket(){
             id = -1;
-            soket = zmq_socket(context, ZMQ_PAIR);
+            socket = zmq_socket(context, ZMQ_PAIR);
             
         }
         void bind(int node){
             id = node;
-            if(zmq_bind(soket, ("tcp://*:" + std::to_string(MAIN_id + id)).c_str())){
+            if(zmq_bind(socket, ("tcp://*:" + std::to_string(MAIN_id + id)).c_str())){
                 throw std::runtime_error("ZMQ_bind");
             }
         }
@@ -42,15 +50,15 @@ class Soket{
             if (id == -1){
                 return;
             }
-            if(zmq_unbind(soket, ("tcp://*:" + std::to_string(MAIN_id + id)).c_str())){
-                throw std::runtime_error("ZMQ_unbind");
+            if(zmq_unbind(socket, ("tcp://*:" + std::to_string(MAIN_id + id)).c_str())){
+                throw std::runtime_error("ZMQ_unbind" + std::to_string(id));
             }
             id = -1;
         }
 
         void connect(int node){
             id = node;
-            if(zmq_connect(soket, ("tcp://localhost:" + std::to_string(MAIN_id + id)).c_str())){
+            if(zmq_connect(socket, ("tcp://localhost:" + std::to_string(MAIN_id + id)).c_str())){
                 throw std::runtime_error("ZMQ_con");
             }
         }
@@ -59,19 +67,26 @@ class Soket{
             if (id == -1){
                 return;
             }
-            if(zmq_disconnect(soket, ("tcp://*:" + std::to_string(MAIN_id + id)).c_str())){
+            if(zmq_disconnect(socket, ("tcp://*:" + std::to_string(MAIN_id + id)).c_str())){
                 throw std::runtime_error("ZMQ_discon");
             }
             id = -1;
         }
 
         void send_message(const zmqmessage * mes){
-            zmq_send(soket, mes, sizeof(zmqmessage), ZMQ_DONTWAIT);
+            zmq_send(socket, mes, sizeof(zmqmessage), 0);
+
           
         }
-        zmqmessage * recive_message(){
-            zmqmessage * mes = new zmqmessage();
-            zmq_recv(soket, mes, sizeof(zmqmessage), ZMQ_DONTWAIT);
-            return mes;
+        void recive_message(zmqmessage *&mes){
+            zmq_recv(socket, mes, sizeof(zmqmessage), 0);
+        }
+
+        void close(){
+            zmq_close(socket);
+        }
+        void new_socket(){
+            id = -1;
+            socket = zmq_socket(context, ZMQ_PAIR);
         }
 };
